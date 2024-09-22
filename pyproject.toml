@@ -1,0 +1,28 @@
+[project]
+name = "nl_omt"
+dynamic = ["version"]
+authors = [
+    { name = "Gabriele Masina" },
+]
+description = "Convert NonLinear Programming problems from AMPL format (.nl) to SMT-LIBv2 with optimization extensions."
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "pytest>=8.3.3"
+]
+
+[project.urls]
+Homepage = "https://github.com/masinag/ampl-to-smtlib"
+Issues = "https://github.com/masinag/ampl-to-smtlib/issues"
+
+
+# tests
+[tool.pytest]
+addopts = ["-v", "-s", "--cov=nl_omt", "--cov-report=term-missing"]
+testpaths = ["tests"]
+
