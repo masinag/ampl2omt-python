@@ -90,3 +90,14 @@ def test_parse_definition_segment(mocker, manager, builder, parser, x):
     assert builder.get_definition(10) == manager.Sum([manager.Mult(x[3], manager.Real(10)),
                                                       manager.Mult(x[4], manager.Real(11)),
                                                       manager.Plus(builder.get_definition(9), manager.Real(1))])
+
+def test_parse_cons_body_segment(mocker, manager, builder, parser, x):
+    segment = LineStream(io.StringIO("""C1
+    o0 # +
+    v5 # x[5]
+    o46 # cos
+    v6 # x[6]"""))
+    mocker.patch.object(builder, "is_problem_var", side_effect=lambda i: i in x)
+    mocker.patch.object(builder, "get_problem_var", side_effect=x.get)
+    parser.parse_segment(segment, builder)
+    assert builder.cons_body[1] == manager.Plus(x[5], manager.Cos(x[6]))

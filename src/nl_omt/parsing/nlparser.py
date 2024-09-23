@@ -114,6 +114,8 @@ class NLParser:
                 self.parse_suffix_segment(line, line_stream, problem_builder)
             case "V":
                 self.parse_definition_segment(line, line_stream, problem_builder)
+            case "C":
+                self.parse_cons_body_segment(line, line_stream, problem_builder)
 
     def parse_imported_function_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
         raise NotImplementedError("Imported functions not supported yet")
@@ -178,3 +180,8 @@ class NLParser:
             arity, = line_stream.next_ints(1)
         children = tuple(self.parse_expression(line_stream, problem_builder) for _ in range(arity))
         return self.term_manager.create(op, children)
+
+    def parse_cons_body_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder) -> None:
+        i, = line_stream.parse_ints(1, line)
+        expr = self.parse_expression(line_stream, problem_builder)
+        problem_builder.with_cons_body(i, expr)
