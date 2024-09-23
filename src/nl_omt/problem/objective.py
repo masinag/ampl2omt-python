@@ -1,4 +1,4 @@
-from nl_omt.expression.node import Node
+from nl_omt.term.term import Term
 
 
 class Objective:
@@ -10,7 +10,7 @@ class Objective:
     :param ExpressionGraph: The expression graph.
     """
 
-    def __init__(self, kind: int, expression_graph: Node, name: str | None = None):
+    def __init__(self, kind: int, expression_graph: Term, name: str | None = None):
         self.expression_graph = expression_graph
         self.name = name
         self.kind = kind

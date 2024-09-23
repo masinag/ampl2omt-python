@@ -1,9 +1,9 @@
 from typing import Iterable
 
-from nl_omt.expression.node import Node
+from nl_omt.term.term import Term
 from nl_omt.problem.objective import Objective
 
-Constraint = Node
+Constraint = Term
 
 
 class NLPProblem:
