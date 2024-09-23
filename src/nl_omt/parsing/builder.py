@@ -1,5 +1,4 @@
 from nl_omt.problem.objective import Objective
-from nl_omt.term.manager import TermManager
 from nl_omt.term.term import Term
 
 
@@ -16,7 +15,7 @@ class ProblemBuilder:
         self.defined_vars: dict[int, Term] = {}
 
         self.cons_body: dict[int, Term] = {}
-        self.obj: list[Objective] = []
+        self.obj: dict[int, Objective] = {}
         self.ranges: list[Term] = []
         self.eqs: list[Term] = []
         self.lns: list[Term] = []
@@ -78,8 +77,9 @@ class ProblemBuilder:
         assert i < len(self.obj), f"Objective {i} not defined"
         return self.obj[i]
 
-    def with_obj(self, obj: Objective):
-        self.obj.append(obj)
+    def with_obj(self, i: int, obj: Objective):
+        assert i not in self.obj, f"Objective {i} is already defined"
+        self.obj[i] = obj
         return self
 
     def get_range(self, i: int) -> Term:

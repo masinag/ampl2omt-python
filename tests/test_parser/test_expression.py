@@ -3,6 +3,7 @@ import io
 import pytest
 
 from nl_omt.parsing.stream import LineStream
+from nl_omt.problem.objective import Objective
 from nl_omt.term.term import Term
 
 
@@ -91,6 +92,7 @@ def test_parse_definition_segment(mocker, manager, builder, parser, x):
                                                       manager.Mult(x[4], manager.Real(11)),
                                                       manager.Plus(builder.get_definition(9), manager.Real(1))])
 
+
 def test_parse_cons_body_segment(mocker, manager, builder, parser, x):
     segment = LineStream(io.StringIO("""C1
     o0 # +
@@ -101,3 +103,30 @@ def test_parse_cons_body_segment(mocker, manager, builder, parser, x):
     mocker.patch.object(builder, "get_problem_var", side_effect=x.get)
     parser.parse_segment(segment, builder)
     assert builder.cons_body[1] == manager.Plus(x[5], manager.Cos(x[6]))
+
+
+def test_parse_objective_segment(mocker, manager, builder, parser, x, defs):
+    segment = LineStream(io.StringIO("""O0 1 #zip
+    o35 # if
+    o28 # >=
+    v10 #t[2]
+    n0
+    o16 #-
+    o5 #^
+    v10 #t[2]
+    n3
+    o16 #-
+    o5 #^
+    v10 #t[2]
+    n2"""))
+    mocker.patch.object(builder, "is_problem_var", side_effect=lambda i: i in x)
+    mocker.patch.object(builder, "get_problem_var", side_effect=x.get)
+    mocker.patch.object(builder, "get_definition", side_effect=defs.get)
+
+    parser.parse_segment(segment, builder)
+    expected = Objective(Objective.MAXIMIZE, manager.If(
+        manager.Ge(builder.get_definition(10), manager.Real(0)),
+        manager.Neg(manager.Pow(builder.get_definition(10), manager.Real(3))),
+        manager.Neg(manager.Pow(builder.get_definition(10), manager.Real(2)))
+    ))
+    assert builder.get_obj(0) == expected

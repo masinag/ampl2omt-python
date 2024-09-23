@@ -285,11 +285,11 @@ class TermManager:
     def AllDiff(self, children: Iterable[Term]) -> Term:
         return self.create_nary(self.term_type(ALLDIFF), children)
 
-    def If(self, then_term: Term, else_term: Term, condition_term: Term) -> Term:
-        return self.create(self.term_type(IF), (then_term, else_term, condition_term))
+    def If(self, condition_term: Term, then_term: Term, else_term: Term) -> Term:
+        return self.create(self.term_type(IF), (condition_term, then_term, else_term))
 
-    def Ifs(self, then_term: Term, else_term: Term, condition_terms: Term) -> Term:
-        return self.create(self.term_type(IFS), (then_term, else_term, condition_terms))
+    def Ifs(self, condition_term: Term, then_term: Term, else_term: Term) -> Term:
+        return self.create(self.term_type(IFS), (condition_term, then_term, else_term))
 
     def Implies(self, left: Term, right: Term) -> Term:
         return self.create_binary(self.term_type(IMPLIES), left, right)

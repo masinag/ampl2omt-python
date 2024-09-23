@@ -3,6 +3,7 @@ import os
 
 from nl_omt.parsing.builder import ProblemBuilder
 from nl_omt.parsing.stream import LineStream
+from nl_omt.problem.objective import Objective
 from nl_omt.problem.problem import NLPProblem
 from nl_omt.term.manager import TermManager
 from nl_omt.term.term import Term
@@ -116,6 +117,10 @@ class NLParser:
                 self.parse_definition_segment(line, line_stream, problem_builder)
             case "C":
                 self.parse_cons_body_segment(line, line_stream, problem_builder)
+            case "L":
+                self.parse_logic_constraint_segment(line, line_stream, problem_builder)
+            case "O":
+                self.parse_objective_segment(line, line_stream, problem_builder)
 
     def parse_imported_function_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
         raise NotImplementedError("Imported functions not supported yet")
@@ -185,3 +190,14 @@ class NLParser:
         i, = line_stream.parse_ints(1, line)
         expr = self.parse_expression(line_stream, problem_builder)
         problem_builder.with_cons_body(i, expr)
+
+    def parse_logic_constraint_segment(self, line: str, line_stream: LineStream,
+                                       problem_builder: ProblemBuilder) -> None:
+        raise NotImplementedError("Logic constraints not supported yet")
+
+    def parse_objective_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder) -> None:
+        i, sigma = line_stream.parse_ints(2, line)
+        expr = self.parse_expression(line_stream, problem_builder)
+        kind = Objective.MINIMIZE if sigma == 0 else Objective.MAXIMIZE
+        obj = Objective(kind, expr)
+        problem_builder.with_obj(i, obj)

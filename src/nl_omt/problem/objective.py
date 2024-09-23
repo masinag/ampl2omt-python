@@ -1,6 +1,9 @@
+from dataclasses import dataclass
+
 from nl_omt.term.term import Term
 
 
+@dataclass
 class Objective:
     """
     A class to represent an objective.
@@ -9,12 +12,9 @@ class Objective:
     :param kind: The kind of the objective (MINIMIZE or MAXIMIZE).
     :param ExpressionGraph: The expression graph.
     """
+    kind: int
+    expression_graph: Term
+    name: str | None = None
 
-    def __init__(self, kind: int, expression_graph: Term, name: str | None = None):
-        self.expression_graph = expression_graph
-        self.name = name
-        self.kind = kind
-
-    def __str__(self):
-        s = f"{self.name}: " if self.name is not None else ""
-        return f"{s}{self.kind} {self.expression_graph}"
+    MINIMIZE = 0
+    MAXIMIZE = 1
