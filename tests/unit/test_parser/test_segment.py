@@ -2,8 +2,8 @@ import io
 
 import pytest
 
-from nl_omt.parsing.stream import LineStream
-from nl_omt.problem.objective import Objective
+from ampl2omt.parsing.stream import LineStream
+from ampl2omt.problem.objective import Objective
 
 
 def test_parse_function_segment(mgr, parser, builder):

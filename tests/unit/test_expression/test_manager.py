@@ -1,6 +1,6 @@
 import pytest
 
-from nl_omt.term import types
+from ampl2omt.term import types
 
 
 @pytest.fixture

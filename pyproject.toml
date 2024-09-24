@@ -21,9 +21,11 @@ dependencies = [
 Homepage = "https://github.com/masinag/ampl-to-smtlib"
 Issues = "https://github.com/masinag/ampl-to-smtlib/issues"
 
+[project.scripts]
+ampl2omt = "nl_omt.cli:main"
 
 # tests
 [tool.pytest]
-addopts = ["-v", "-s", "--cov=nl_omt", "--cov-report=term-missing"]
+addopts = ["-v", "-s", "--cov=ampl2omt", "--cov-report=term-missing"]
 testpaths = ["tests"]
 

@@ -1,6 +1,6 @@
 import os
 
-from nl_omt.problem.objective import Objective
+from ampl2omt.problem.objective import Objective
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 

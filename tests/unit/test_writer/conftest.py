@@ -1,6 +1,6 @@
 import pytest
 
-from nl_omt.writing.smtlibwriter import SmtlibWriter
+from ampl2omt.writing.smtlibwriter import SmtlibWriter
 
 
 @pytest.fixture

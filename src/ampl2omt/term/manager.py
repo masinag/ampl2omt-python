@@ -1,7 +1,7 @@
 from typing import Iterable, Any
 
-from nl_omt.term.term import Term, TermType
-from nl_omt.term.types import FLOOR, CEIL, ABS, NEG, TANH, TAN, SQRT, SINH, SIN, LOG10, LOG, EXP, COSH, COS, \
+from ampl2omt.term.term import Term, TermType
+from ampl2omt.term.types import FLOOR, CEIL, ABS, NEG, TANH, TAN, SQRT, SINH, SIN, LOG10, LOG, EXP, COSH, COS, \
     ATANH, ATAN, ASINH, ASIN, ACOSH, ACOS, PLUS, MINUS, MULT, DIV, REM, POW, ATAN2, INTDIV, PRECISION, ROUND, TRUNC, \
     NOT, OR, AND, IF, IFS, IMPLIES, IFF, ANDN, ORN, LT, LE, EQ, GE, GT, NE, MIN, MAX, SUM, COUNT, NUMBEROF, NUMBEROFS, \
     ALLDIFF, REAL, INT, BOOL, VAR_REAL, VAR_INT, VAR_BOOL, LESS

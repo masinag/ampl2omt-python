@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from nl_omt.term.term import Term
+from ampl2omt.term.term import Term
 
 
 @dataclass

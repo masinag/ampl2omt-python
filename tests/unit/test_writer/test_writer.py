@@ -1,5 +1,5 @@
-from nl_omt.problem.objective import Objective
-from nl_omt.problem.problem import NLPProblem
+from ampl2omt.problem.objective import Objective
+from ampl2omt.problem.problem import NLPProblem
 
 
 def test_write_vars(writer, x):

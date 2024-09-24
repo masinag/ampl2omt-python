@@ -1,6 +1,6 @@
-from nl_omt.problem.objective import Objective
-from nl_omt.problem.problem import NLPProblem
-from nl_omt.term.term import Term, topo_sort
+from ampl2omt.problem.objective import Objective
+from ampl2omt.problem.problem import NLPProblem
+from ampl2omt.term.term import Term, topo_sort
 
 
 class SmtlibWriter:

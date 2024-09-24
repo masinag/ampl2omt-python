@@ -1,8 +1,8 @@
 import pytest
 
-from nl_omt.parsing.builder import ProblemBuilder
-from nl_omt.parsing.nlparser import NLParser
-from nl_omt.term.term import Term
+from ampl2omt.parsing.builder import ProblemBuilder
+from ampl2omt.parsing.nlparser import NLParser
+from ampl2omt.term.term import Term
 from tests.unit.conftest import mgr
 
 

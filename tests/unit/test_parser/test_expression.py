@@ -2,7 +2,7 @@ import io
 
 import pytest
 
-from nl_omt.parsing.stream import LineStream
+from ampl2omt.parsing.stream import LineStream
 
 
 def test_constant(mgr, parser, builder):

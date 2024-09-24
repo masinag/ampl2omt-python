@@ -1,6 +1,6 @@
 import pytest
 
-from nl_omt.term.manager import TermManager
+from ampl2omt.term.manager import TermManager
 
 
 @pytest.fixture(scope='module')
