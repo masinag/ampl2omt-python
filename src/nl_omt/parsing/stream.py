@@ -31,3 +31,10 @@ class LineStream:
     def next_ints(self, n: int, n_opt=0) -> tuple[int, ...]:
         line = self.next_line()
         return self.parse_ints(n, line, n_opt)
+
+    def peek(self) -> str:
+        """Return the next line without consuming it."""
+        pos = self.stream.tell()
+        line = self.stream.readline()
+        self.stream.seek(pos)
+        return line.strip()

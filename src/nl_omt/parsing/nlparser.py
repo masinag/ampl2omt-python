@@ -1,5 +1,6 @@
 import io
 import os
+from collections.abc import Callable
 
 from nl_omt.parsing.builder import ProblemBuilder
 from nl_omt.parsing.stream import LineStream
@@ -127,6 +128,14 @@ class NLParser:
                 self.parse_primal_initial_guess_segment(line, line_stream, problem_builder)
             case "r":
                 self.parse_range_segment(line_stream, problem_builder)
+            case "b":
+                self.parse_var_bounds_segment(line_stream, problem_builder)
+            case "k":
+                self.parse_jacobian_column_counts_segment(line_stream, problem_builder)
+            case "J":
+                self.parse_jacobian_sparsity_segment(line, line_stream, problem_builder)
+            case "G":
+                self.parse_gradient_sparsity_segment(line, line_stream, problem_builder)
 
     def parse_imported_function_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
         raise NotImplementedError("Imported functions not supported yet")
@@ -215,31 +224,38 @@ class NLParser:
         raise NotImplementedError("Primal initial guesses not supported yet")
 
     def parse_range_segment(self, line_stream: LineStream, problem_builder: ProblemBuilder):
-        n_cons = problem_builder.n_cons
-        for cons_idx in range(n_cons):
-            cons_body = problem_builder.get_cons_body(cons_idx)
+        self._parse_ranges(problem_builder.n_cons, problem_builder.get_cons_body, line_stream, problem_builder)
+
+    def parse_var_bounds_segment(self, line_stream: LineStream, problem_builder: ProblemBuilder):
+        self._parse_ranges(problem_builder.n_vars, problem_builder.get_problem_var, line_stream, problem_builder)
+
+    def _parse_ranges(self, n_terms: int, get_term_fn: Callable[[int], Term], line_stream: LineStream,
+                      problem_builder: ProblemBuilder):
+        for idx in range(n_terms):
+            cons_body = get_term_fn(idx)
             line = line_stream.next_line()
+            print(f"[{line}]")
             kind, *bounds = line.split()
             kind = int(kind)
             match kind:
-                case 0: # full range
+                case 0:  # full range
                     l, u = map(float, bounds)
                     constraint = self.term_manager.And(
                         self.term_manager.Ge(cons_body, self.term_manager.Real(l)),
                         self.term_manager.Le(cons_body, self.term_manager.Real(u))
                     )
-                case 1: # upper bound
+                case 1:  # upper bound
                     u, = map(float, bounds)
                     constraint = self.term_manager.Le(cons_body, self.term_manager.Real(u))
-                case 2: # lower bound
+                case 2:  # lower bound
                     l, = map(float, bounds)
                     constraint = self.term_manager.Ge(cons_body, self.term_manager.Real(l))
-                case 3: # no constraint
+                case 3:  # no constraint
                     constraint = None
-                case 4: # equality
+                case 4:  # equality
                     l, = map(float, bounds)
                     constraint = self.term_manager.Eq(cons_body, self.term_manager.Real(l))
-                case 5: # complementarity constraint
+                case 5:  # complementarity constraint
                     raise ValueError("Complementarity constraints not supported yet")
                 case _:
                     raise ValueError("Invalid range kind")
@@ -247,4 +263,19 @@ class NLParser:
             if constraint is not None:
                 problem_builder.with_range(constraint)
 
+    def parse_jacobian_column_counts_segment(self, line_stream: LineStream, problem_builder: ProblemBuilder):
+        # only consume n_vars - 1 lines
+        for _ in range(problem_builder.n_vars - 1):
+            line_stream.next_line()
 
+    def parse_jacobian_sparsity_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
+        self._parse_sparse_matrix(line, line_stream)
+
+    def parse_gradient_sparsity_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
+        self._parse_sparse_matrix(line, line_stream)
+
+    def _parse_sparse_matrix(self, line: str, line_stream: LineStream):
+        _, k = line_stream.parse_ints(2, line)
+        # consume k lines
+        for _ in range(k):
+            line_stream.next_line()
