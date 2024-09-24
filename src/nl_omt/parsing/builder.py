@@ -1,9 +1,13 @@
 from nl_omt.problem.objective import Objective
+from nl_omt.problem.problem import NLPProblem
+from nl_omt.term.manager import TermManager
 from nl_omt.term.term import Term
 
 
 class ProblemBuilder:
-    def __init__(self):
+    def __init__(self, mgr: TermManager):
+        self.mgr = mgr
+
         self.n_vars: int = 0
         self.n_cons: int = 0
         self.n_obj: int = 0
@@ -16,8 +20,8 @@ class ProblemBuilder:
 
         self.cons_body: dict[int, Term] = {}
         self.obj: dict[int, Objective] = {}
-        self.ranges: list[Term] = []
-        self.eqs: list[Term] = []
+        self.cons_ranges: dict[int, tuple[float | None, float | None]] = {}
+        self.var_ranges: dict[int, tuple[float | None, float | None]] = {}
         self.lns: list[Term] = []
 
     def with_n_vars(self, n_vars: int):
@@ -82,10 +86,48 @@ class ProblemBuilder:
         self.obj[i] = obj
         return self
 
-    def get_range(self, i: int) -> Term:
-        assert i < len(self.ranges), f"Range {i} not defined"
-        return self.ranges[i]
-
-    def with_range(self, term: Term):
-        self.ranges.append(term)
+    def with_cons_range(self, i: int, lower: float | None, upper: float | None):
+        self.cons_ranges[i] = (lower, upper)
         return self
+
+    def with_var_range(self, i: int, lower: float | None, upper: float | None):
+        self.var_ranges[i] = (lower, upper)
+        return self
+
+    def build_problem(self) -> NLPProblem:
+        self._check_integrity()
+        constraints = []
+        for i, (lower, upper) in self.var_ranges.items():
+            vi = self.get_problem_var(i)
+            self._add_constraints(vi, lower, upper, constraints)
+
+        for i, (lower, upper) in self.cons_ranges.items():
+            ci = self.get_cons_body(i)
+            self._add_constraints(ci, lower, upper, constraints)
+
+        return NLPProblem(
+            variables=list(self.problem_vars.values()),
+            objectives=list(self.obj.values()),
+            constraints=constraints,
+        )
+
+    def _add_constraints(self, vi, lower, upper, constraints):
+        if lower is None and upper is None:
+            return
+        if lower == upper:
+            constraints.append(self.mgr.Eq(vi, self.mgr.Real(lower)))
+        else:
+            if lower is not None:
+                constraints.append(self.mgr.Ge(vi, self.mgr.Real(lower)))
+            elif upper is not None:
+                constraints.append(self.mgr.Le(vi, self.mgr.Real(upper)))
+
+    def _check_integrity(self):
+        assert len(self.problem_vars) == self.n_vars, f"Expected {self.n_vars} variables, got {len(self.problem_vars)}"
+        assert len(self.cons_body) == self.n_cons, f"Expected {self.n_cons} constraints, got {len(self.cons_body)}"
+        assert len(self.obj) == self.n_obj, f"Expected {self.n_obj} objectives, got {len(self.obj)}"
+        n_eqs = sum(1 for l, u in self.cons_ranges.values() if l is not None and u is not None and l == u)
+        n_rgs = sum(1 for l, u in self.cons_ranges.values() if l is not None and u is not None and l != u)
+        assert n_eqs == self.n_eqs, f"Expected {self.n_eqs} equality constraints, got {n_eqs}"
+        assert n_rgs == self.n_ranges, f"Expected {self.n_ranges} range constraints, got {n_rgs}"
+        assert len(self.var_ranges) == self.n_vars, f"Expected {self.n_vars} var ranges, got {len(self.var_ranges)}"

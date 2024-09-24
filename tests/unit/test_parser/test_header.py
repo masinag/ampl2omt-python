@@ -3,7 +3,6 @@ import io
 import pytest
 
 from nl_omt.parsing.stream import LineStream
-from tests.test_parser.conftest import parser
 
 
 def test_parse_header_success(parser, builder):

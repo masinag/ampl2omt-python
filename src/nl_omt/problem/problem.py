@@ -1,17 +1,11 @@
-from typing import Iterable
+from dataclasses import dataclass
 
-from nl_omt.term.term import Term
 from nl_omt.problem.objective import Objective
+from nl_omt.term.term import Term
 
-Constraint = Term
 
-
+@dataclass
 class NLPProblem:
-    def __init__(self,
-                 objective: Objective | None = None,
-                 constraints: Iterable[Constraint] | None = None
-                 ):
-        self.objective = objective
-        if constraints is None:
-            constraints = []
-        self.constraints = constraints
+    variables: list[Term]
+    objectives: list[Objective]
+    constraints: list[Term]

@@ -7,8 +7,10 @@ class LineStream:
 
     def next_line(self) -> str:
         line = self.stream.readline()
-        line = line.split("#")[0]
-        return line.strip()
+        line = line.split("#")[0].strip()
+        if not line:
+            raise EOFError
+        return line
 
     def parse_ints(self, n: int, string: str, n_opt=0) -> tuple[int, ...]:
         """

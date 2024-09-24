@@ -50,30 +50,25 @@ class NLParser:
         :param stream: The stream to parse.
         :return: The parsed NLP problem.
         """
-        problem_builder = ProblemBuilder()
+        builder = ProblemBuilder(self.term_manager)
         line_stream = LineStream(stream)
         try:
-            self.parse_header(line_stream, problem_builder)
+            self.parse_header(line_stream, builder)
         except EOFError:
             raise ValueError("Invalid header")
         while True:
             try:
-                self.parse_segment(line_stream, problem_builder)
+                self.parse_segment(line_stream, builder)
             except EOFError:
                 break
 
-        self.build_problem()
-
-    def build_problem(self) -> NLPProblem:
-        raise NotImplementedError("TODO: Implement me!")
+        return builder.build_problem()
 
     def parse_header(self, line_stream: LineStream, problem_builder: ProblemBuilder) -> None:
         # line 1
         line = line_stream.next_line()
         if line[0] != "g":
             raise ValueError("Unsupported format: expected file to start with 'g'")
-        line = line[1:]
-        line_stream.parse_ints(4, line)
         # line 2
         n_vars, n_cons, n_obj, n_ranges, n_eqs, *n_lns = line_stream.next_ints(6, n_opt=1)
         if n_lns:
@@ -123,9 +118,9 @@ class NLParser:
             case "O":
                 self.parse_objective_segment(line, line_stream, problem_builder)
             case "d":
-                self.parse_dual_initial_guess_segment(line, line_stream, problem_builder)
+                self.parse_dual_initial_guess_segment(line, line_stream)
             case "x":
-                self.parse_primal_initial_guess_segment(line, line_stream, problem_builder)
+                self.parse_primal_initial_guess_segment(line, line_stream)
             case "r":
                 self.parse_range_segment(line_stream, problem_builder)
             case "b":
@@ -217,51 +212,49 @@ class NLParser:
         obj = Objective(kind, expr)
         problem_builder.with_obj(i, obj)
 
-    def parse_dual_initial_guess_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
-        raise NotImplementedError("Dual initial guesses not supported yet")
+    def parse_dual_initial_guess_segment(self, line: str, line_stream: LineStream):
+        self._parse_initial_guess(line, line_stream)
 
-    def parse_primal_initial_guess_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
-        raise NotImplementedError("Primal initial guesses not supported yet")
+    def parse_primal_initial_guess_segment(self, line: str, line_stream: LineStream):
+        self._parse_initial_guess(line, line_stream)
+
+    def _parse_initial_guess(self, line: str, line_stream: LineStream):
+        m, = line_stream.parse_ints(1, line)
+        # consume m lines
+        for _ in range(m):
+            line_stream.next_line()
 
     def parse_range_segment(self, line_stream: LineStream, problem_builder: ProblemBuilder):
-        self._parse_ranges(problem_builder.n_cons, problem_builder.get_cons_body, line_stream, problem_builder)
+        self._parse_ranges(problem_builder.n_cons, line_stream, problem_builder.with_cons_range)
 
     def parse_var_bounds_segment(self, line_stream: LineStream, problem_builder: ProblemBuilder):
-        self._parse_ranges(problem_builder.n_vars, problem_builder.get_problem_var, line_stream, problem_builder)
+        self._parse_ranges(problem_builder.n_vars, line_stream, problem_builder.with_var_range)
 
-    def _parse_ranges(self, n_terms: int, get_term_fn: Callable[[int], Term], line_stream: LineStream,
-                      problem_builder: ProblemBuilder):
+    def _parse_ranges(self, n_terms: int, line_stream: LineStream,
+                      add_range_fn: Callable[[int, float | None, float | None], None]):
         for idx in range(n_terms):
-            cons_body = get_term_fn(idx)
             line = line_stream.next_line()
-            print(f"[{line}]")
             kind, *bounds = line.split()
             kind = int(kind)
+            l, u = None, None
             match kind:
                 case 0:  # full range
                     l, u = map(float, bounds)
-                    constraint = self.term_manager.And(
-                        self.term_manager.Ge(cons_body, self.term_manager.Real(l)),
-                        self.term_manager.Le(cons_body, self.term_manager.Real(u))
-                    )
                 case 1:  # upper bound
                     u, = map(float, bounds)
-                    constraint = self.term_manager.Le(cons_body, self.term_manager.Real(u))
                 case 2:  # lower bound
                     l, = map(float, bounds)
-                    constraint = self.term_manager.Ge(cons_body, self.term_manager.Real(l))
                 case 3:  # no constraint
-                    constraint = None
+                    pass
                 case 4:  # equality
                     l, = map(float, bounds)
-                    constraint = self.term_manager.Eq(cons_body, self.term_manager.Real(l))
+                    u = l
                 case 5:  # complementarity constraint
                     raise ValueError("Complementarity constraints not supported yet")
                 case _:
                     raise ValueError("Invalid range kind")
 
-            if constraint is not None:
-                problem_builder.with_range(constraint)
+            add_range_fn(idx, l, u)
 
     def parse_jacobian_column_counts_segment(self, line_stream: LineStream, problem_builder: ProblemBuilder):
         # only consume n_vars - 1 lines
