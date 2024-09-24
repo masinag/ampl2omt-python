@@ -2,13 +2,8 @@ import pytest
 
 from nl_omt.parsing.builder import ProblemBuilder
 from nl_omt.parsing.nlparser import NLParser
-from nl_omt.term.manager import TermManager
 from nl_omt.term.term import Term
-
-
-@pytest.fixture(scope='module')
-def mgr():
-    return TermManager()
+from tests.unit.conftest import mgr
 
 
 @pytest.fixture(scope='module')

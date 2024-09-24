@@ -14,5 +14,18 @@ class TermType:
 @dataclass(frozen=True)
 class Term:
     term_type: TermType
-    children: Iterable['Term']
+    children: tuple['Term']
     payload: Any
+
+
+def topo_sort(term: Term) -> Iterable[Term]:
+    stack = [term]
+    visited = set()
+    while stack:
+        node = stack[-1]
+        if node in visited:
+            stack.pop()
+            yield node
+        else:
+            visited.add(node)
+            stack.extend(reversed(node.children))

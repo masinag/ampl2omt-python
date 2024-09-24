@@ -1,22 +1,16 @@
 import pytest
 
 from nl_omt.term import types
-from nl_omt.term.manager import TermManager
 
 
 @pytest.fixture
-def manager():
-    return TermManager()
+def one(mgr):
+    return mgr.Real(1)
 
 
 @pytest.fixture
-def one(manager):
-    return manager.Real(1)
-
-
-@pytest.fixture
-def two(manager):
-    return manager.Real(2)
+def two(mgr):
+    return mgr.Real(2)
 
 
 @pytest.mark.parametrize("method, term_type", [
@@ -24,8 +18,8 @@ def two(manager):
     ("Int", types.INT),
     ("Bool", types.BOOL),
 ])
-def test_constants(manager, method, term_type):
-    assert getattr(manager, method)(1).term_type == manager.term_type(term_type)
+def test_constants(mgr, method, term_type):
+    assert getattr(mgr, method)(1).term_type == mgr.term_type(term_type)
 
 
 @pytest.mark.parametrize("method, term_type", [
@@ -33,8 +27,8 @@ def test_constants(manager, method, term_type):
     ("VarInt", types.VAR_INT),
     ("VarBool", types.VAR_BOOL),
 ])
-def test_variables(manager, method, term_type):
-    assert getattr(manager, method)("x").term_type == manager.term_type(term_type)
+def test_variables(mgr, method, term_type):
+    assert getattr(mgr, method)("x").term_type == mgr.term_type(term_type)
 
 
 @pytest.mark.parametrize("method, term_type", [
@@ -47,8 +41,8 @@ def test_variables(manager, method, term_type):
     ("Tan", types.TAN),
     ("Sqrt", types.SQRT)
 ])
-def test_unary_operators(manager, one, method, term_type):
-    assert getattr(manager, method)(one).term_type == manager.term_type(term_type)
+def test_unary_operators(mgr, one, method, term_type):
+    assert getattr(mgr, method)(one).term_type == mgr.term_type(term_type)
 
 
 @pytest.mark.parametrize("method, term_type", [
@@ -74,8 +68,8 @@ def test_unary_operators(manager, one, method, term_type):
     ("Trunc", types.TRUNC),
     ("Iff", types.IFF)
 ])
-def test_binary_operators(manager, one, two, method, term_type):
-    assert getattr(manager, method)(one, two).term_type == manager.term_type(term_type)
+def test_binary_operators(mgr, one, two, method, term_type):
+    assert getattr(mgr, method)(one, two).term_type == mgr.term_type(term_type)
 
 
 @pytest.mark.parametrize("method, term_type", [
@@ -85,35 +79,35 @@ def test_binary_operators(manager, one, two, method, term_type):
     ("Count", types.COUNT),
     ("NumberOf", types.NUMBEROF)
 ])
-def test_nary_operators(manager, one, two, method, term_type):
-    assert getattr(manager, method)([one, two]).term_type == manager.term_type(term_type)
+def test_nary_operators(mgr, one, two, method, term_type):
+    assert getattr(mgr, method)([one, two]).term_type == mgr.term_type(term_type)
 
 
-def test_cached_constants(manager):
-    node1 = manager.Real(1)
-    node2 = manager.Real(1)
+def test_cached_constants(mgr):
+    node1 = mgr.Real(1)
+    node2 = mgr.Real(1)
     assert node1 is node2
 
 
-def test_cached_variables(manager):
-    node1 = manager.VarReal("x")
-    node2 = manager.VarReal("x")
+def test_cached_variables(mgr):
+    node1 = mgr.VarReal("x")
+    node2 = mgr.VarReal("x")
     assert node1 is node2
 
 
-def test_cached_unary_operators(manager, one):
-    node1 = manager.Floor(one)
-    node2 = manager.Floor(one)
+def test_cached_unary_operators(mgr, one):
+    node1 = mgr.Floor(one)
+    node2 = mgr.Floor(one)
     assert node1 is node2
 
 
-def test_cached_binary_operators(manager, one, two):
-    node1 = manager.Plus(one, two)
-    node2 = manager.Plus(one, two)
+def test_cached_binary_operators(mgr, one, two):
+    node1 = mgr.Plus(one, two)
+    node2 = mgr.Plus(one, two)
     assert node1 is node2
 
 
-def test_cached_nary_operators(manager, one, two):
-    node1 = manager.Min([one, two])
-    node2 = manager.Min([one, two])
+def test_cached_nary_operators(mgr, one, two):
+    node1 = mgr.Min([one, two])
+    node2 = mgr.Min([one, two])
     assert node1 is node2
