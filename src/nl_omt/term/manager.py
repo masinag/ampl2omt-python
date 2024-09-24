@@ -296,10 +296,10 @@ class TermManager:
 
     # Constants
     def Real(self, value: float) -> Term:
-        return self.create_constant(self.term_type(REAL), value)
+        return self.create_constant(self.term_type(REAL), float(value))
 
     def Int(self, value: int) -> Term:
-        return self.create_constant(self.term_type(INT), value)
+        return self.create_constant(self.term_type(INT), int(value))
 
     def Bool(self, value: bool) -> Term:
         return self.create_constant(self.term_type(BOOL), value)
