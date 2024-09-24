@@ -121,6 +121,12 @@ class NLParser:
                 self.parse_logic_constraint_segment(line, line_stream, problem_builder)
             case "O":
                 self.parse_objective_segment(line, line_stream, problem_builder)
+            case "d":
+                self.parse_dual_initial_guess_segment(line, line_stream, problem_builder)
+            case "x":
+                self.parse_primal_initial_guess_segment(line, line_stream, problem_builder)
+            case "r":
+                self.parse_range_segment(line_stream, problem_builder)
 
     def parse_imported_function_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
         raise NotImplementedError("Imported functions not supported yet")
@@ -201,3 +207,44 @@ class NLParser:
         kind = Objective.MINIMIZE if sigma == 0 else Objective.MAXIMIZE
         obj = Objective(kind, expr)
         problem_builder.with_obj(i, obj)
+
+    def parse_dual_initial_guess_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
+        raise NotImplementedError("Dual initial guesses not supported yet")
+
+    def parse_primal_initial_guess_segment(self, line: str, line_stream: LineStream, problem_builder: ProblemBuilder):
+        raise NotImplementedError("Primal initial guesses not supported yet")
+
+    def parse_range_segment(self, line_stream: LineStream, problem_builder: ProblemBuilder):
+        n_cons = problem_builder.n_cons
+        for cons_idx in range(n_cons):
+            cons_body = problem_builder.get_cons_body(cons_idx)
+            line = line_stream.next_line()
+            kind, *bounds = line.split()
+            kind = int(kind)
+            match kind:
+                case 0: # full range
+                    l, u = map(float, bounds)
+                    constraint = self.term_manager.And(
+                        self.term_manager.Ge(cons_body, self.term_manager.Real(l)),
+                        self.term_manager.Le(cons_body, self.term_manager.Real(u))
+                    )
+                case 1: # upper bound
+                    u, = map(float, bounds)
+                    constraint = self.term_manager.Le(cons_body, self.term_manager.Real(u))
+                case 2: # lower bound
+                    l, = map(float, bounds)
+                    constraint = self.term_manager.Ge(cons_body, self.term_manager.Real(l))
+                case 3: # no constraint
+                    constraint = None
+                case 4: # equality
+                    l, = map(float, bounds)
+                    constraint = self.term_manager.Eq(cons_body, self.term_manager.Real(l))
+                case 5: # complementarity constraint
+                    raise ValueError("Complementarity constraints not supported yet")
+                case _:
+                    raise ValueError("Invalid range kind")
+
+            if constraint is not None:
+                problem_builder.with_range(constraint)
+
+

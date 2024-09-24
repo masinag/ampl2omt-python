@@ -24,6 +24,17 @@ def defs(manager, x):
     }
 
 
+@pytest.fixture
+def constraints(manager, x, defs):
+    return {
+        0: manager.Le(manager.Plus(defs[10], manager.Sin(defs[11])), manager.Real(4)),
+        1: manager.Ge(manager.Plus(x[4], manager.Cos(x[5])), manager.Real(3)),
+        2: manager.Eq(manager.Sum([manager.Mult(manager.Real(i), x[i]) for i in range(2, 7)]), manager.Real(1)),
+        3: manager.Ge(manager.Plus(manager.Pow(x[0], manager.Real(2)), manager.Pow(x[1], manager.Real(2))),
+                      manager.Real(1)),
+    }
+
+
 def test_constant(manager, parser, builder):
     segment = LineStream(io.StringIO("n1e-1"))
     term = parser.parse_expression(segment, builder)
@@ -130,3 +141,21 @@ def test_parse_objective_segment(mocker, manager, builder, parser, x, defs):
         manager.Neg(manager.Pow(builder.get_definition(10), manager.Real(2)))
     ))
     assert builder.get_obj(0) == expected
+
+
+def test_parse_ranges_segment(mocker, manager, builder, parser, x, constraints):
+    segment = LineStream(io.StringIO("""r #4 ranges (rhs's)
+    1 3
+    2 3
+    0 4.3 15.5
+    4 1"""))
+    mocker.patch.object(builder, "is_problem_var", side_effect=lambda i: i in x)
+    mocker.patch.object(builder, "get_problem_var", side_effect=x.get)
+    mocker.patch.object(builder, "get_cons_body", side_effect=constraints.get)
+    builder.n_cons = len(constraints)
+    parser.parse_segment(segment, builder)
+    assert builder.ranges == [manager.Le(constraints[0], manager.Real(3)),
+                              manager.Ge(constraints[1], manager.Real(3)),
+                              manager.And(manager.Ge(constraints[2], manager.Real(4.3)),
+                                          manager.Le(constraints[2], manager.Real(15.5))),
+                              manager.Eq(constraints[3], manager.Real(1))]
