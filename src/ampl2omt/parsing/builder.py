@@ -24,6 +24,22 @@ class ProblemBuilder:
         self.var_ranges: dict[int, tuple[float | None, float | None]] = {}
         self.lns: list[Term] = []
 
+    def __repr__(self):
+        return (f"ProblemBuilder("
+                f"\tn_vars={self.n_vars},\n"
+                f"\tn_cons={self.n_cons},\n"
+                f"\tn_obj={self.n_obj},\n"
+                f"\tn_ranges={self.n_ranges},\n"
+                f"\tn_eqs={self.n_eqs},\n"
+                f"\tn_lns={self.n_lns},\n"
+                f"\tproblem_vars=\n\t\t{'\n\t\t'.join(map(str, self.problem_vars.values()))},\n"
+                f"\tdefined_vars=\n\t\t{'\n\t\t'.join(map(str, self.defined_vars.values()))},\n"
+                f"\tcons_body=\n\t\t{'\n\t\t'.join(map(str, self.cons_body.values()))},\n"
+                f"\tobj=\n\t\t{'\n\t\t'.join(map(str, self.obj.values()))},\n"
+                f"\tcons_ranges={self.cons_ranges.values()},\n"
+                f"\tvar_ranges={self.var_ranges.values()},\n"
+                f"\tlns={self.lns})")
+
     def with_n_vars(self, n_vars: int):
         self.n_vars = n_vars
         return self
@@ -119,7 +135,7 @@ class ProblemBuilder:
         else:
             if lower is not None:
                 constraints.append(self.mgr.Ge(vi, self.mgr.Real(lower)))
-            elif upper is not None:
+            if upper is not None:
                 constraints.append(self.mgr.Le(vi, self.mgr.Real(upper)))
 
     def _check_integrity(self):
