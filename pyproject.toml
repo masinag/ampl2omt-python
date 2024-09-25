@@ -22,7 +22,7 @@ Homepage = "https://github.com/masinag/ampl-to-smtlib"
 Issues = "https://github.com/masinag/ampl-to-smtlib/issues"
 
 [project.scripts]
-ampl2omt = "nl_omt.cli:main"
+ampl2omt = "ampl2omt.cli:main"
 
 # tests
 [tool.pytest]
