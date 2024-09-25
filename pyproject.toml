@@ -1,5 +1,5 @@
 [project]
-name = "nl_omt"
+name = "ampl2omt"
 dynamic = ["version"]
 authors = [
     { name = "Gabriele Masina" },
