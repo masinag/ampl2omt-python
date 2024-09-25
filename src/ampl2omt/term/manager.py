@@ -65,8 +65,8 @@ class TermManager:
             TermType(IFF, "iff", 2),
 
             # ------ N-ary operators
-            TermType(ANDN, "andn", TermType.NARY),
-            TermType(ORN, "orn", TermType.NARY),
+            TermType(ANDN, "and", TermType.NARY),
+            TermType(ORN, "or", TermType.NARY),
             # --- Comparison operators
             # ------ Binary operators
             TermType(LT, "<", 2),
