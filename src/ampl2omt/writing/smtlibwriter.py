@@ -1,6 +1,6 @@
 from ampl2omt.problem.objective import Objective
 from ampl2omt.problem.problem import NLPProblem
-from ampl2omt.term.term import Term, topo_sort
+from ampl2omt.term.term import Term, topo_sort, is_var, is_const
 
 
 class SmtlibWriter:
@@ -34,8 +34,14 @@ class SmtlibWriter:
         definitions: dict[Term, str] = {}
         n_defs = 0
         for node in topo_sort(term):
-            if len(node.children) == 0:
-                definition = str(node.payload)
+            if is_var(node):
+                definition = node.payload
+            elif is_const(node):
+                value = node.payload
+                if isinstance(value, float) and value < 0:
+                    definition = f"(- {abs(value)})"
+                else:
+                    definition = str(value)
             else:
                 if daggify:
                     definition = f".def_{n_defs}"
@@ -50,5 +56,5 @@ class SmtlibWriter:
         return term_str
 
     def term_to_string_def(self, term: Term, definitions: dict[Term, str]) -> str:
-        assert len(term.children) > 0
+        assert len(term.children) > 0, str(term)
         return f"({term.term_type.name} {' '.join(definitions[c] for c in term.children)})"

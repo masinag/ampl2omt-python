@@ -1,7 +1,7 @@
 from ampl2omt.problem.objective import Objective
 from ampl2omt.problem.problem import NLPProblem
 from ampl2omt.term.manager import TermManager
-from ampl2omt.term.term import Term
+from ampl2omt.term.term import Term, is_const
 
 
 class ProblemBuilder:
@@ -128,6 +128,9 @@ class ProblemBuilder:
         )
 
     def _add_constraints(self, vi, lower, upper, constraints):
+        if is_const(vi):
+            # The constraint has been simplified out (not sure)
+            return
         if lower is None and upper is None:
             return
         if lower == upper:

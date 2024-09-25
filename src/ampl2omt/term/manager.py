@@ -78,7 +78,7 @@ class TermManager:
             # --- N-ary operators
             TermType(MIN, "min", TermType.NARY),
             TermType(MAX, "max", TermType.NARY),
-            TermType(SUM, "sum", TermType.NARY),
+            TermType(SUM, "+", TermType.NARY),
             TermType(COUNT, "count", TermType.NARY),
             TermType(NUMBEROF, "numberof", TermType.NARY),
             TermType(NUMBEROFS, "numberofs", TermType.NARY),
